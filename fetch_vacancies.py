@@ -2,7 +2,6 @@ import requests
 
 def get_vacancies(lang):
     vac_path = 'https://api.hh.ru/vacancies/'
-
     payload = {
         'text':'программист',
         'text':lang,
@@ -13,9 +12,7 @@ def get_vacancies(lang):
     return response
 
 def get_lang_rating(count):
-
     langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
-
     lang_rating = {}
     for lang in langs:
         vacancies = get_vacancies(lang).json()['found']
@@ -24,17 +21,15 @@ def get_lang_rating(count):
 
     return lang_rating
 
-def get_salary_by_lang(lang):
-
-    vacancies = get_vacancies(lang).json()['items']
-
+def get_salary_by_lang(vacancies):
+    '''Возвращает зарплаты при заданном языке программирования. На вход принимает результат работы функции get_vacancies'''
     salary = []
     for i in range(len(vacancies)):
         salary.append(vacancies[i]['salary'])
     return salary
 
-def predict_rub_salary(lang, vacancy_id):
-    vacancies = get_vacancies(lang).json()['items']
+def predict_rub_salary(vacancies, vacancy_id):
+    '''Предсказывает зарплату по id вакансии'''
     for i in range(len(vacancies)):
         if int(vacancies[i]['id']) == vacancy_id:
             salary = vacancies[i]['salary']
@@ -58,7 +53,7 @@ if __name__ == '__main__':
 
     vacancies = get_vacancies('Python').json()['items']
     for i in range(len(vacancies)):
-        print(predict_rub_salary('Python', int(vacancies[i]['id'])))
+        print(predict_rub_salary(vacancies, int(vacancies[i]['id'])))
 
 
     #print('Вызов с salary = null.  {}'.format()
