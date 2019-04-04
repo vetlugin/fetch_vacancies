@@ -6,7 +6,7 @@ def get_vacancies(lang):
     payload = {
         'text':'программист',
         'text':lang,
-        'area':'3',
+        'area':'1',
         'period': '30',
     }
     response = requests.get(vac_path, params=payload)
@@ -33,6 +33,36 @@ def get_salary_by_lang(lang):
         salary.append(vacancies[i]['salary'])
     return salary
 
+def predict_rub_salary(lang, vacancy_id):
+    vacancies = get_vacancies(lang).json()['items']
+    for i in range(len(vacancies)):
+        if int(vacancies[i]['id']) == vacancy_id:
+            salary = vacancies[i]['salary']
+            if salary == None:
+                return None
+
+            salary_currency = vacancies[i]['salary']['currency']
+            salary_from = vacancies[i]['salary']['from']
+            salary_to = vacancies[i]['salary']['to']
+
+            if salary_currency != 'RUR':
+                return None
+            elif salary_from == None:
+                return salary_to * 0.8
+            elif salary_to == None:
+                return salary_from * 1.2
+            else:
+                return (salary_from+salary_to)/2
+
 if __name__ == '__main__':
-    #print(get_lang_rating(150))
-    print(get_salary_by_lang('python'))
+
+    vacancies = get_vacancies('Python').json()['items']
+    for i in range(len(vacancies)):
+        print(predict_rub_salary('Python', int(vacancies[i]['id'])))
+
+
+    #print('Вызов с salary = null.  {}'.format()
+    #print('Вызов с USD = {}'.format(predict_rub_salary('Python',30524028)))
+    #print('Вызов с from = null.  {}'.format(predict_rub_salary('Python',30223179)))
+    #print('Вызов с to = null.  {}'.format(predict_rub_salary('Python',28755864)))
+    #print('Полный вызов.  {}'.format(predict_rub_salary('Python',30673508)))
