@@ -11,6 +11,7 @@ def get_vacancies(lang):
     response = requests.get(vac_path, params=payload)
     return response
 
+
 def get_lang_rating(count):
     langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
     lang_rating = {}
@@ -49,12 +50,51 @@ def predict_rub_salary(vacancies, vacancy_id):
             else:
                 return (salary_from+salary_to)/2
 
-if __name__ == '__main__':
+def get_salary_by_lang(lang):
+    '''Возвращает словарь типа:
+        {
+        "vacancies_found": 1000,    # - Количество найденых вакансий
+        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
+        "average_salary": 100000    # - Средняя зарплата
+        }
+    '''
+    response = get_vacancies(lang).json()
+    vacancies_found = response['found']
+    vacancies = response['items']
 
-    vacancies = get_vacancies('Python').json()['items']
+    vacancies_processed = 0
+    average_salary = 0
+
     for i in range(len(vacancies)):
-        print(predict_rub_salary(vacancies, int(vacancies[i]['id'])))
+        salary_id = predict_rub_salary(vacancies, int(vacancies[i]['id']))
+        if salary_id != None:
+            vacancies_processed += 1
+            average_salary += salary_id
 
+    return {
+            'vacancies_found':vacancies_found,
+            'vacancies_processed':vacancies_processed,
+            'average_salary':int(average_salary/vacancies_processed)
+            }
+
+
+if __name__ == '__main__':
+    print ('Тест функции {}'.format('get_salary_by_lang'))
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
+
+    salary_by_lang = {}
+
+    for lang in langs:
+        salary_by_lang[lang] = get_salary_by_lang(lang)
+
+    print(salary_by_lang)
+
+
+#    print ('Тест функции {}'.format('predict_rub_salary'))
+#    vacancies = get_vacancies('Python').json()['items']
+#    for i in range(len(vacancies)):
+#        print(predict_rub_salary(vacancies, int(vacancies[i]['id'])))
 
     #print('Вызов с salary = null.  {}'.format()
     #print('Вызов с USD = {}'.format(predict_rub_salary('Python',30524028)))
