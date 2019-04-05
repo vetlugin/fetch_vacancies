@@ -1,5 +1,6 @@
 import requests
 import pprint
+import time
 
 def get_vacancies(lang):
     vac_path = 'https://api.hh.ru/vacancies/'
@@ -26,15 +27,34 @@ def get_all_vacancies(lang):
             'text':lang,
             'area':'1',
             'period': '30',
+            'per_page':'100',
             'page': page,
         }
         response = requests.get(vac_path, params=payload).json()
+        try:
+            page_data = response['items']
+            pages_number = response['pages']
+            vac_found = response['found']
+        except KeyError:
+            break
 
-        page_data = response['items']
-        pages_number = response['pages']
-        vac_found = response['found']
+        #Отладка функции get_all_vacancies
+        #pprint.pprint(page_data)
+
+        #print('Длина списка all_vacancies = {}'.format(len(all_vacancies))) # Отладочный print
+        #print('Количество вакансий на странице = {}'.format(len(page_data))) # Отладочный print
+        #print('Номер страницы = {}'.format(page)) # Отладочный print
+        #print('Всего страниц = {}'.format(pages_number)) # Отладочный print
+        #print('Найдено вакансий = {}'.format(vac_found)) # Отладочный print
+        #print("______________________________")
+
+        #a = input('Дальше?')
+        #if a == 'z':
+        #    break
+        #End of debugging get_all_vacancies
 
         page += 1
+
         all_vacancies = all_vacancies + page_data
 
     return all_vacancies
@@ -79,22 +99,23 @@ def predict_rub_salary(vacancies, vacancy_id):
                 return (salary_from+salary_to)/2
 
 def get_salary_by_lang(lang):
-    '''Возвращает словарь типа:
+    '''Function return dictionary like this:
         {
         "vacancies_found": 1000,    # - Количество найденых вакансий
         "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
         "average_salary": 100000    # - Средняя зарплата
         }
     '''
-    response = get_vacancies(lang).json()
-    vacancies_found = response['found']
-    vacancies = response['items']
+    vacancies = get_all_vacancies(lang)
+    vacancies_found = len(vacancies)
+    #print("Amount of vacancies: {}".format(vacancies_found)) # Test print
 
     vacancies_processed = 0
     average_salary = 0
 
-    for i in range(len(vacancies)):
+    for i in range(vacancies_found):
         salary_id = predict_rub_salary(vacancies, int(vacancies[i]['id']))
+        #print("Salary ID of {} -- is: {}".format(i, salary_id)) # Test print
         if salary_id != None:
             vacancies_processed += 1
             average_salary += salary_id
@@ -105,13 +126,27 @@ def get_salary_by_lang(lang):
             'average_salary':int(average_salary/vacancies_processed)
             }
 
+def average_salary_by_lang():
+    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','Go','Objective-C','Scala','Swift','C#']
+    average_salary_by_lang = {}
+    for lang in langs:
+        average_salary_by_lang[lang] = get_salary_by_lang(lang)
+    return average_salary_by_lang
 
 if __name__ == '__main__':
-    print ('Тест функции {}'.format('get_all_vacancies'))
+    start_time = time.time()
 
-    pprint.pprint(get_all_vacancies('scala'))
-# отладка функции get_all_vacancies
+    pprint.pprint(average_salary_by_lang())
 
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+
+#    print ('Тест функции {}'.format('get_all_vacancies'))
+#    get_all_vacancies('python')
+
+            #Отладка функции get_all_vacancies
             #pprint.pprint(page_data)
 
             #print('Длина списка all_vacancies = {}'.format(len(all_vacancies))) # Отладочный print
