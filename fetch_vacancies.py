@@ -1,4 +1,5 @@
 import requests
+import pprint
 
 def get_vacancies(lang):
     vac_path = 'https://api.hh.ru/vacancies/'
@@ -10,6 +11,33 @@ def get_vacancies(lang):
     }
     response = requests.get(vac_path, params=payload)
     return response
+
+
+def get_all_vacancies(lang):
+    '''Функция выдает все вакансии по заданному языку программирования'''
+
+    page = pages_number = 0
+    all_vacancies = []
+    vac_path = 'https://api.hh.ru/vacancies/'
+
+    while page <= pages_number:
+        payload = {
+            'text':'программист',
+            'text':lang,
+            'area':'1',
+            'period': '30',
+            'page': page,
+        }
+        response = requests.get(vac_path, params=payload).json()
+
+        page_data = response['items']
+        pages_number = response['pages']
+        vac_found = response['found']
+
+        page += 1
+        all_vacancies = all_vacancies + page_data
+
+    return all_vacancies
 
 
 def get_lang_rating(count):
@@ -79,16 +107,32 @@ def get_salary_by_lang(lang):
 
 
 if __name__ == '__main__':
-    print ('Тест функции {}'.format('get_salary_by_lang'))
+    print ('Тест функции {}'.format('get_all_vacancies'))
 
-    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
+    pprint.pprint(get_all_vacancies('scala'))
+# отладка функции get_all_vacancies
 
-    salary_by_lang = {}
+            #pprint.pprint(page_data)
 
-    for lang in langs:
-        salary_by_lang[lang] = get_salary_by_lang(lang)
+            #print('Длина списка all_vacancies = {}'.format(len(all_vacancies))) # Отладочный print
+            #print('Количество вакансий на странице = {}'.format(len(page_data))) # Отладочный print
+            #print('Номер страницы = {}'.format(page)) # Отладочный print
+            #print('Всего страниц = {}'.format(pages_number)) # Отладочный print
+            #print('Найдено вакансий = {}'.format(vac_found)) # Отладочный print
+            #print("______________________________")
 
-    print(salary_by_lang)
+            #a = input('Дальше?')
+            #if a == 'z':
+            #    break
+
+
+
+    #print ('Тест функции {}'.format('get_salary_by_lang'))
+    #langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
+    #salary_by_lang = {}
+    #for lang in langs:
+    #    salary_by_lang[lang] = get_salary_by_lang(lang)
+    #print(salary_by_lang)
 
 
 #    print ('Тест функции {}'.format('predict_rub_salary'))
