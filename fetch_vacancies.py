@@ -148,13 +148,45 @@ def get_vacancies_superjob():
     response = requests.get(vac_path, headers=head, params=payload).json()
     return response
 
+def get_predict_rub_salary_sj(vacancies, vacancy_id):
+
+    print(vacancy_id)
+    for i in range(len(vacancies)):
+        print('++ {} ++'.format(vacancies[i]['id']))
+        if int(vacancies[i]['id']) == vacancy_id:
+            salary_currency = vacancies[i]['currency']
+            salary_from = vacancies[i]['payment_from']
+            salary_to = vacancies[i]['payment_to']
+            salary = vacancies[i]['payment']
+
+            if salary_currency != 'rub':
+                print('salary_currency is {}'.format(salary_currency))
+                return None
+            elif salary_from == 0:
+                print('salary_from is {}'.format(salary_from))
+                return salary_to * 0.8
+            elif salary_to == 0:
+                print('salary_to is {}'.format(salary_to))
+                return salary_from * 1.2
+            elif salary == 'null':
+                print('salary is {}'.format(salary))
+                return None
+            else:
+                return (salary_from+salary_to)/2
+
+    # TODO return number or None
+
+def predict_rub_salary_for_SuperJob():
+    return
+
 if __name__ == '__main__':
     start_time = time.time()
 
     vacancies = get_vacancies_superjob()['objects']
 
-    for vacancy in vacancies:
-        print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
+    print(get_predict_rub_salary_sj(vacancies, 31852228))
+    #for vacancy in vacancies:
+    #    print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
 
     #v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55
     #code=f65ca76e3ef77f7c16fdf74aeac893b6393358de6a9f5360d6c0e09811a2f8e3.9abdd22caeda398b73f47c49bc7ba1e895b1caa7
