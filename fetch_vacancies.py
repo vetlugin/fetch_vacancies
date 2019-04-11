@@ -135,14 +135,33 @@ def average_salary_by_lang():
         average_salary_by_lang[lang] = get_salary_by_lang(lang)
     return average_salary_by_lang
 
+
+def get_vacancies_superjob():
+    vac_path = 'https://api.superjob.ru/2.0/vacancies/'
+    head = {
+        'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
+    }
+    payload = {
+        'town':'4',
+        'keyword':'python',
+    }
+    response = requests.get(vac_path, headers=head, params=payload).json()
+    return response
+
 if __name__ == '__main__':
     start_time = time.time()
 
-    pprint.pprint(average_salary_by_lang())
+    vacancies = get_vacancies_superjob()['objects']
+
+    for vacancy in vacancies:
+        print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
+
+    #v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55
+    #code=f65ca76e3ef77f7c16fdf74aeac893b6393358de6a9f5360d6c0e09811a2f8e3.9abdd22caeda398b73f47c49bc7ba1e895b1caa7
 
     print("--- %s seconds ---" % (time.time() - start_time))
 
-
+#    pprint.pprint(average_salary_by_lang())
 #    print ('Тест функции {}'.format('get_all_vacancies'))
 #    get_all_vacancies('python')
 
