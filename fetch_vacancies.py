@@ -136,23 +136,24 @@ def average_salary_by_lang():
     return average_salary_by_lang
 
 
-def get_vacancies_superjob():
+def get_vacancies_superjob(lang):
+    '''Get JSON data with vacancies by language'''
+
     vac_path = 'https://api.superjob.ru/2.0/vacancies/'
     head = {
         'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
     }
     payload = {
         'town':'4',
-        'keyword':'python',
+        'keyword':lang,
     }
     response = requests.get(vac_path, headers=head, params=payload).json()
     return response
 
-def get_predict_rub_salary_sj(vacancies, vacancy_id):
-
-    print(vacancy_id)
+def predict_rub_salary_sj(vacancies, vacancy_id):
+    #print(vacancy_id)
     for i in range(len(vacancies)):
-        print('++ {} ++'.format(vacancies[i]['id']))
+        #print('++ {} ++'.format(vacancies[i]['id']))
         if int(vacancies[i]['id']) == vacancy_id:
             salary_currency = vacancies[i]['currency']
             salary_from = vacancies[i]['payment_from']
@@ -160,19 +161,25 @@ def get_predict_rub_salary_sj(vacancies, vacancy_id):
             salary = vacancies[i]['payment']
 
             if salary_currency != 'rub':
-                print('salary_currency is {}'.format(salary_currency))
+                #print('salary_currency is {}'.format(salary_currency))
                 return None
-            elif salary_from == 0:
-                print('salary_from is {}'.format(salary_from))
-                return salary_to * 0.8
-            elif salary_to == 0:
-                print('salary_to is {}'.format(salary_to))
+
+            if salary_from == 0 and salary_to == 0 and salary == 0:
+                return None
+
+            if salary == 0 and salary_to == 0 and salary_from != 0:
+                #print('salary_to is {}'.format(salary_from * 1.2))
                 return salary_from * 1.2
-            elif salary == 'null':
-                print('salary is {}'.format(salary))
-                return None
-            else:
-                return (salary_from+salary_to)/2
+
+            if salary == 0 and salary_from == 0 and salary_to != 0:
+                #print('salary_to is {}'.format(salary_to * 0.8))
+                return salary_to * 0.8
+
+            if salary_to == 0 and salary_from == 0 and salary != 0:
+                #print('salary_to is {}'.format(salary))
+                return salary
+
+    return (salary_from+salary_to)/2
 
     # TODO return number or None
 
@@ -182,9 +189,14 @@ def predict_rub_salary_for_SuperJob():
 if __name__ == '__main__':
     start_time = time.time()
 
-    vacancies = get_vacancies_superjob()['objects']
+    vacancies = get_vacancies_superjob('python')['objects']
 
-    print(get_predict_rub_salary_sj(vacancies, 31852228))
+    print('Вызов со всей ЗП по нулям.  {}'.format(predict_rub_salary_sj(vacancies,31625649)))
+
+    print('Вызов с только с from.  {}'.format(predict_rub_salary_sj(vacancies,31686638)))
+    print('Вызов с только с to.  {}'.format(predict_rub_salary_sj(vacancies,31756672)))
+    print('Вызов когда есть to и from, payment=0.  {}'.format(predict_rub_salary_sj(vacancies,31947344)))
+
     #for vacancy in vacancies:
     #    print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
 
