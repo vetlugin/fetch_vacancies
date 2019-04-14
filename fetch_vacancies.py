@@ -14,7 +14,7 @@ def get_vacancies(lang):
     return response
 
 
-def get_all_vacancies(lang):
+def get_all_vacancies(lang):  #Function is ready
     '''Функция выдает все вакансии по заданному языку программирования'''
 
     page = pages_number = 0
@@ -136,19 +136,36 @@ def average_salary_by_lang():
     return average_salary_by_lang
 
 
-def get_vacancies_superjob(lang):
+def get_vacancies_sj(lang): #Function is ready
     '''Get JSON data with vacancies by language'''
 
-    vac_path = 'https://api.superjob.ru/2.0/vacancies/'
     head = {
         'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
     }
-    payload = {
-        'town':'4',
-        'keyword':lang,
-    }
-    response = requests.get(vac_path, headers=head, params=payload).json()
-    return response
+
+    page = pages_number = 0
+    all_vacancies = []
+    vac_path = 'https://api.superjob.ru/2.0/vacancies/'
+
+    while page <= pages_number:
+        payload = {
+            'town':'4',
+            'keyword':lang,
+            'page':page,
+            'count':100,
+        }
+        response = requests.get(vac_path, headers=head, params=payload).json()
+
+        try:
+            page_data = response['objects']
+            vac_found = response['total']
+            pages_number = int(vac_found/100) + 1
+        except KeyError:
+            break
+
+        page += 1
+        all_vacancies = all_vacancies + page_data
+    return all_vacancies
 
 def predict_rub_salary_sj(vacancies, vacancy_id):
     #print(vacancy_id)
@@ -189,13 +206,18 @@ def predict_rub_salary_for_SuperJob():
 if __name__ == '__main__':
     start_time = time.time()
 
-    vacancies = get_vacancies_superjob('python')['objects']
+    print(len(get_vacancies_sj('менеджер')))
+    #vacancies = get_vacancies_sj('программист')['objects']
+    #print(len(vacancies))
 
-    print('Вызов со всей ЗП по нулям.  {}'.format(predict_rub_salary_sj(vacancies,31625649)))
 
-    print('Вызов с только с from.  {}'.format(predict_rub_salary_sj(vacancies,31686638)))
-    print('Вызов с только с to.  {}'.format(predict_rub_salary_sj(vacancies,31756672)))
-    print('Вызов когда есть to и from, payment=0.  {}'.format(predict_rub_salary_sj(vacancies,31947344)))
+
+
+    #print('Вызов со всей ЗП по нулям.  {}'.format(predict_rub_salary_sj(vacancies,31625649)))
+
+    #print('Вызов с только с from.  {}'.format(predict_rub_salary_sj(vacancies,31686638)))
+    #print('Вызов с только с to.  {}'.format(predict_rub_salary_sj(vacancies,31756672)))
+    #print('Вызов когда есть to и from, payment=0.  {}'.format(predict_rub_salary_sj(vacancies,31947344)))
 
     #for vacancy in vacancies:
     #    print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
