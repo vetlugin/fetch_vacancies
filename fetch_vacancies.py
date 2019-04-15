@@ -13,6 +13,12 @@ def get_vacancies(lang):
     response = requests.get(vac_path, params=payload)
     return response
 
+def search_dict_in_list(list_for_searching, key_dict, key_search):
+    '''Функция ищет в списке словарей, словарь в котором есть запись с ключом key_dict равная по значению key_search'''
+    for i in range(len(list_for_searching)):
+        if str(list_for_searching[i][key_dict]) == str(key_search):
+            return list_for_searching[i]
+    return None
 
 def get_all_vacancies(lang):  #Function is ready
     '''Функция выдает все вакансии по заданному языку программирования'''
@@ -155,59 +161,63 @@ def get_vacancies_sj(lang): #Function is ready
             'count':100,
         }
         response = requests.get(vac_path, headers=head, params=payload).json()
-
         try:
             page_data = response['objects']
             vac_found = response['total']
             pages_number = int(vac_found/100) + 1
         except KeyError:
             break
-
         page += 1
         all_vacancies = all_vacancies + page_data
     return all_vacancies
 
-def predict_rub_salary_sj(vacancies, vacancy_id):
-    #print(vacancy_id)
-    for i in range(len(vacancies)):
-        #print('++ {} ++'.format(vacancies[i]['id']))
-        if int(vacancies[i]['id']) == vacancy_id:
-            salary_currency = vacancies[i]['currency']
-            salary_from = vacancies[i]['payment_from']
-            salary_to = vacancies[i]['payment_to']
-            salary = vacancies[i]['payment']
+def predict_rub_salary_sj(vacancy_id, vacancies=None):
+    '''Функция предсказывает зарплату по вакансиям сайта SuperJob.'''
 
-            if salary_currency != 'rub':
-                #print('salary_currency is {}'.format(salary_currency))
-                return None
+    if vacancies == None:
+        head = {
+            'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
+        }
+        vac_path = 'https://api.superjob.ru/2.0/vacancies/{}/'.format(vacancy_id)
+        response = requests.get(vac_path, headers=head).json()
+        try:
+            salary_currency = response['currency']
+            salary_to = response['payment_to']
+            salary_from = response['payment_from']
+        except KeyError:
+            return
+    else:
+        for i in range(len(vacancies)):
+            if int(vacancies[i]['id']) == vacancy_id:
+                salary_currency = vacancies[i]['currency']
+                salary_from = vacancies[i]['payment_from']
+                salary_to = vacancies[i]['payment_to']
+            break
+        return -1
 
-            if salary_from == 0 and salary_to == 0 and salary == 0:
-                return None
+    if salary_currency != 'rub':
+        return None
 
-            if salary == 0 and salary_to == 0 and salary_from != 0:
-                #print('salary_to is {}'.format(salary_from * 1.2))
-                return salary_from * 1.2
+    if salary_from == 0 and salary_to == 0:
+        return None
 
-            if salary == 0 and salary_from == 0 and salary_to != 0:
-                #print('salary_to is {}'.format(salary_to * 0.8))
-                return salary_to * 0.8
+    if salary_to == 0 and salary_from != 0:
+        return salary_from * 1.2
 
-            if salary_to == 0 and salary_from == 0 and salary != 0:
-                #print('salary_to is {}'.format(salary))
-                return salary
+    if salary_from == 0 and salary_to != 0:
+        return salary_to * 0.8
 
     return (salary_from+salary_to)/2
-
-    # TODO return number or None
-
-def predict_rub_salary_for_SuperJob():
-    return
 
 if __name__ == '__main__':
     start_time = time.time()
 
-    print(len(get_vacancies_sj('менеджер')))
-    #vacancies = get_vacancies_sj('программист')['objects']
+    vacancies = get_vacancies_sj('python')
+
+    print(search_dict_in_list(vacancies, 'profession', 'Разработчик Python'))
+    #print(type(vacancies))
+    #print(predict_rub_salary_sj(32018045,vacancies))
+
     #print(len(vacancies))
 
 
