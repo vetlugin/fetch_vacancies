@@ -173,40 +173,38 @@ def get_vacancies_sj(lang): #Function is ready
 
 def predict_rub_salary_sj(vacancy_id, vacancies=None):
     '''Функция предсказывает зарплату по вакансиям сайта SuperJob.'''
-
+    
+    #Если в функцию не передали список вакансий, то делаем прямой запрос на SuperJob и ищем вакансию там
     if vacancies == None:
         head = {
             'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
         }
         vac_path = 'https://api.superjob.ru/2.0/vacancies/{}/'.format(vacancy_id)
         response = requests.get(vac_path, headers=head).json()
-        try:
-            salary_currency = response['currency']
-            salary_to = response['payment_to']
-            salary_from = response['payment_from']
-        except KeyError:
-            return
+    #Если на вход функции принят список вакансий, то ищем в нём нужную вакасию
     else:
-        for i in range(len(vacancies)):
-            if int(vacancies[i]['id']) == vacancy_id:
-                salary_currency = vacancies[i]['currency']
-                salary_from = vacancies[i]['payment_from']
-                salary_to = vacancies[i]['payment_to']
-            break
-        return -1
+        response = search_dict_in_list(vacancies,'id',vacancy_id)
+    #Используем try: на случай если в словаре не будет необходимых ключей (например, при ошибке запроса)
+    try:
+        salary_currency = response['currency']
+        salary_to = response['payment_to']
+        salary_from = response['payment_from']
+    except KeyError:
+        return
 
+    # Если валюта не равна рублям - возвращаем None
     if salary_currency != 'rub':
         return None
-
+    # Если не указаны зарплаты - возвращаем None
     if salary_from == 0 and salary_to == 0:
         return None
-
+    # Если указан только нижний потолок зарплаты, то предсказываем с коэффициентом 1.2
     if salary_to == 0 and salary_from != 0:
         return salary_from * 1.2
-
+    # Если указан только верхний потолок зарплаты, то предсказываем с коэффициентом 0.8
     if salary_from == 0 and salary_to != 0:
         return salary_to * 0.8
-
+    # Если указан весь диапазон зарплат, то передаём среднюю зарплату
     return (salary_from+salary_to)/2
 
 if __name__ == '__main__':
@@ -214,64 +212,6 @@ if __name__ == '__main__':
 
     vacancies = get_vacancies_sj('python')
 
-    print(search_dict_in_list(vacancies, 'profession', 'Разработчик Python'))
-    #print(type(vacancies))
-    #print(predict_rub_salary_sj(32018045,vacancies))
-
-    #print(len(vacancies))
-
-
-
-
-    #print('Вызов со всей ЗП по нулям.  {}'.format(predict_rub_salary_sj(vacancies,31625649)))
-
-    #print('Вызов с только с from.  {}'.format(predict_rub_salary_sj(vacancies,31686638)))
-    #print('Вызов с только с to.  {}'.format(predict_rub_salary_sj(vacancies,31756672)))
-    #print('Вызов когда есть to и from, payment=0.  {}'.format(predict_rub_salary_sj(vacancies,31947344)))
-
-    #for vacancy in vacancies:
-    #    print('{}, {}'.format(vacancy['profession'],vacancy['town']['title']))
-
-    #v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55
-    #code=f65ca76e3ef77f7c16fdf74aeac893b6393358de6a9f5360d6c0e09811a2f8e3.9abdd22caeda398b73f47c49bc7ba1e895b1caa7
+    print(predict_rub_salary_sj(31947344))
 
     print("--- %s seconds ---" % (time.time() - start_time))
-
-#    pprint.pprint(average_salary_by_lang())
-#    print ('Тест функции {}'.format('get_all_vacancies'))
-#    get_all_vacancies('python')
-
-            #Отладка функции get_all_vacancies
-            #pprint.pprint(page_data)
-
-            #print('Длина списка all_vacancies = {}'.format(len(all_vacancies))) # Отладочный print
-            #print('Количество вакансий на странице = {}'.format(len(page_data))) # Отладочный print
-            #print('Номер страницы = {}'.format(page)) # Отладочный print
-            #print('Всего страниц = {}'.format(pages_number)) # Отладочный print
-            #print('Найдено вакансий = {}'.format(vac_found)) # Отладочный print
-            #print("______________________________")
-
-            #a = input('Дальше?')
-            #if a == 'z':
-            #    break
-
-
-
-    #print ('Тест функции {}'.format('get_salary_by_lang'))
-    #langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
-    #salary_by_lang = {}
-    #for lang in langs:
-    #    salary_by_lang[lang] = get_salary_by_lang(lang)
-    #print(salary_by_lang)
-
-
-#    print ('Тест функции {}'.format('predict_rub_salary'))
-#    vacancies = get_vacancies('Python').json()['items']
-#    for i in range(len(vacancies)):
-#        print(predict_rub_salary(vacancies, int(vacancies[i]['id'])))
-
-    #print('Вызов с salary = null.  {}'.format()
-    #print('Вызов с USD = {}'.format(predict_rub_salary('Python',30524028)))
-    #print('Вызов с from = null.  {}'.format(predict_rub_salary('Python',30223179)))
-    #print('Вызов с to = null.  {}'.format(predict_rub_salary('Python',28755864)))
-    #print('Полный вызов.  {}'.format(predict_rub_salary('Python',30673508)))
