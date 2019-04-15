@@ -2,17 +2,6 @@ import requests
 import pprint
 import time
 
-def get_vacancies(lang):
-    vac_path = 'https://api.hh.ru/vacancies/'
-    payload = {
-        'text':'программист',
-        'text':lang,
-        'area':'1',
-        'period': '30',
-    }
-    response = requests.get(vac_path, params=payload)
-    return response
-
 def search_dict_in_list(list_for_searching, key_dict, key_search):
     '''Функция ищет в списке словарей, словарь в котором есть запись с ключом key_dict равная по значению key_search'''
     for i in range(len(list_for_searching)):
@@ -20,13 +9,14 @@ def search_dict_in_list(list_for_searching, key_dict, key_search):
             return list_for_searching[i]
     return None
 
-def get_all_vacancies(lang):  #Function is ready
+def get_vacancies_hh(lang):  #Function is ready
     '''Функция выдает все вакансии по заданному языку программирования'''
 
     page = pages_number = 0
     all_vacancies = []
     vac_path = 'https://api.hh.ru/vacancies/'
 
+    # Перебираем все страницы
     while page <= pages_number:
         payload = {
             'text':'программист',
@@ -44,103 +34,10 @@ def get_all_vacancies(lang):  #Function is ready
         except KeyError:
             break
 
-        #Отладка функции get_all_vacancies
-        #pprint.pprint(page_data)
-
-        #print('Длина списка all_vacancies = {}'.format(len(all_vacancies))) # Отладочный print
-        #print('Количество вакансий на странице = {}'.format(len(page_data))) # Отладочный print
-        #print('Номер страницы = {}'.format(page)) # Отладочный print
-        #print('Всего страниц = {}'.format(pages_number)) # Отладочный print
-        #print('Найдено вакансий = {}'.format(vac_found)) # Отладочный print
-        #print("______________________________")
-
-        #a = input('Дальше?')
-        #if a == 'z':
-        #    break
-        #End of debugging get_all_vacancies
-
         page += 1
-
-        all_vacancies = all_vacancies + page_data
+        all_vacancies += page_data
 
     return all_vacancies
-
-
-def get_lang_rating(count):
-    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
-    lang_rating = {}
-    for lang in langs:
-        vacancies = get_vacancies(lang).json()['found']
-        if vacancies >= count:
-            lang_rating[lang] = vacancies
-
-    return lang_rating
-
-def get_salary_by_lang(vacancies):
-    '''Возвращает зарплаты при заданном языке программирования. На вход принимает результат работы функции get_vacancies'''
-    salary = []
-    for i in range(len(vacancies)):
-        salary.append(vacancies[i]['salary'])
-    return salary
-
-def predict_rub_salary(vacancies, vacancy_id):
-    '''Предсказывает зарплату по id вакансии'''
-    for i in range(len(vacancies)):
-        if int(vacancies[i]['id']) == vacancy_id:
-            salary = vacancies[i]['salary']
-            if salary == None:
-                return None
-
-            salary_currency = vacancies[i]['salary']['currency']
-            salary_from = vacancies[i]['salary']['from']
-            salary_to = vacancies[i]['salary']['to']
-
-            if salary_currency != 'RUR':
-                return None
-            elif salary_from == None:
-                return salary_to * 0.8
-            elif salary_to == None:
-                return salary_from * 1.2
-            else:
-                return (salary_from+salary_to)/2
-
-def get_salary_by_lang(lang):
-    '''Function return dictionary like this:
-        {
-        "vacancies_found": 1000,    # - Количество найденых вакансий
-        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
-        "average_salary": 100000    # - Средняя зарплата
-        }
-    '''
-    vacancies = get_all_vacancies(lang)
-    vacancies_found = len(vacancies)
-    #print("Amount of vacancies: {}".format(vacancies_found)) # Test print
-
-    vacancies_processed = 0
-    average_salary = 0
-
-    for i in range(vacancies_found):
-        salary_id = predict_rub_salary(vacancies, int(vacancies[i]['id']))
-        #print("Salary ID of {} -- is: {}".format(i, salary_id)) # Test print
-        if salary_id != None:
-            vacancies_processed += 1
-            average_salary += salary_id
-
-    return {
-            'vacancies_found':vacancies_found,
-            'vacancies_processed':vacancies_processed,
-            'average_salary':int(average_salary/vacancies_processed)
-            }
-
-def average_salary_by_lang():
-    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
-
-    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','Go','Objective-C','Scala','Swift','C#']
-    average_salary_by_lang = {}
-    for lang in langs:
-        average_salary_by_lang[lang] = get_salary_by_lang(lang)
-    return average_salary_by_lang
-
 
 def get_vacancies_sj(lang): #Function is ready
     '''Get JSON data with vacancies by language'''
@@ -148,7 +45,6 @@ def get_vacancies_sj(lang): #Function is ready
     head = {
         'X-Api-App-Id':'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
     }
-
     page = pages_number = 0
     all_vacancies = []
     vac_path = 'https://api.superjob.ru/2.0/vacancies/'
@@ -169,11 +65,55 @@ def get_vacancies_sj(lang): #Function is ready
             break
         page += 1
         all_vacancies = all_vacancies + page_data
+
     return all_vacancies
+
+def get_lang_rating_hh(count=0):
+    '''Функция возвращает словарь с рейтингом языков по зарплатам'''
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
+    lang_rating = {}
+    for lang in langs:
+        vacancies = len(get_vacancies_hh(lang))
+        if vacancies >= count:
+            lang_rating[lang] = vacancies
+    return lang_rating
+
+def get_lang_rating_sj(count=0):
+    '''Функция возвращает словарь с рейтингом языков по зарплатам'''
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','C','Go','Objective-C','Scala','Swift','C#']
+    lang_rating = {}
+    for lang in langs:
+        vacancies = len(get_vacancies_sj(lang))
+        if vacancies >= count:
+            lang_rating[lang] = vacancies
+    return lang_rating
+
+def predict_rub_salary_hh(vacancy_id, vacancies):
+    '''Предсказывает зарплату по id вакансии'''
+    for i in range(len(vacancies)):
+        if int(vacancies[i]['id']) == vacancy_id:
+            salary = vacancies[i]['salary']
+            if salary == None:
+                return None
+
+            salary_currency = vacancies[i]['salary']['currency']
+            salary_from = vacancies[i]['salary']['from']
+            salary_to = vacancies[i]['salary']['to']
+
+            if salary_currency != 'RUR':
+                return None
+            elif salary_from == None:
+                return salary_to * 0.8
+            elif salary_to == None:
+                return salary_from * 1.2
+            else:
+                return (salary_from+salary_to)/2
 
 def predict_rub_salary_sj(vacancy_id, vacancies=None):
     '''Функция предсказывает зарплату по вакансиям сайта SuperJob.'''
-    
+
     #Если в функцию не передали список вакансий, то делаем прямой запрос на SuperJob и ищем вакансию там
     if vacancies == None:
         head = {
@@ -207,11 +147,88 @@ def predict_rub_salary_sj(vacancy_id, vacancies=None):
     # Если указан весь диапазон зарплат, то передаём среднюю зарплату
     return (salary_from+salary_to)/2
 
+def get_salary_by_lang_hh(lang):
+    '''Function return dictionary like this:
+        {
+        "vacancies_found": 1000,    # - Количество найденых вакансий
+        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
+        "average_salary": 100000    # - Средняя зарплата
+        }
+    '''
+    vacancies = get_vacancies_hh(lang)
+    vacancies_found = len(vacancies)
+
+    vacancies_processed = 0
+    average_salary = 0
+
+    for i in range(vacancies_found):
+        salary_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
+        if salary_id != None:
+            vacancies_processed += 1
+            average_salary += salary_id
+
+    if vacancies_processed == 0:
+        average_salary = 0
+        
+    return {
+            'vacancies_found':vacancies_found,
+            'vacancies_processed':vacancies_processed,
+            'average_salary':int(average_salary/vacancies_processed)
+            }
+
+def get_salary_by_lang_sj(lang):
+    '''Function return dictionary like this:
+        {
+        "vacancies_found": 1000,    # - Количество найденых вакансий
+        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
+        "average_salary": 100000    # - Средняя зарплата
+        }
+    '''
+    vacancies = get_vacancies_sj(lang)
+    vacancies_found = len(vacancies)
+
+    vacancies_processed = 0
+    average_salary = 0
+
+    for i in range(vacancies_found):
+        salary_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
+        if salary_id != None:
+            vacancies_processed += 1
+            average_salary += salary_id
+
+    if vacancies_processed == 0:
+        average_salary = 0
+
+    return {
+            'vacancies_found':vacancies_found,
+            'vacancies_processed':vacancies_processed,
+            'average_salary':average_salary
+            }
+
+def average_salary_by_lang_hh():
+    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','Go','Objective-C','Scala','Swift','C#']
+    average_salary_by_lang = {}
+    for lang in langs:
+        average_salary_by_lang[lang] = get_salary_by_lang_hh(lang)
+    return average_salary_by_lang
+
+def average_salary_by_lang_sj():
+    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
+
+    langs = ['JavaScript', 'Java', 'Python', 'Ruby','PHP','C++','Go','Objective-C','Scala','Swift','C#']
+    average_salary_by_lang = {}
+    for lang in langs:
+        average_salary_by_lang[lang] = get_salary_by_lang_sj(lang)
+    return average_salary_by_lang
+
 if __name__ == '__main__':
     start_time = time.time()
 
-    vacancies = get_vacancies_sj('python')
-
-    print(predict_rub_salary_sj(31947344))
+    #print(len(get_vacancies_hh('python')))
+    #print(len(get_vacancies_sj('python')))
+    #print(get_salary_by_lang_hh('python'))
+    print(average_salary_by_lang_sj())
 
     print("--- %s seconds ---" % (time.time() - start_time))
