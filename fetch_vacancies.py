@@ -67,7 +67,8 @@ def get_vacancies_sj(lang):
     lang -- language for searching vacancies of programmers
 
     '''
-    load_dotenv() #Загружаем переменные окружения, где хранится секретный токен
+
+    load_dotenv()  # Загружаем переменные окружения, где хранится токен
     token = os.getenv("TOKEN")
 
     head = {
@@ -100,7 +101,8 @@ def get_vacancies_sj(lang):
 
 def get_lang_rating_hh(count=0):
     '''
-    The function returns a dictionary is conteined {language: count of vacancies} pair.
+    The function returns a dictionary
+    is conteined {language: count of vacancies} pair.
 
     Keywords arguments:
     count -- The minimum number of vacancies to take part in calculate
@@ -130,7 +132,8 @@ def get_lang_rating_hh(count=0):
 
 def get_lang_rating_sj(count=0):
     '''
-    The function returns a dictionary is conteined {language: count of vacancies} pair.
+    The function returns a dictionary
+    is conteined {language: count of vacancies} pair.
 
     Keywords arguments:
     count -- The minimum number of vacancies to take part in calculate
@@ -208,19 +211,20 @@ def predict_rub_salary_sj(vacancy_id, vacancies=None):
     function return (salary_from + salary_to) / 2
     '''
 
-    #Если в функцию не передали список вакансий, то делаем прямой запрос на SuperJob и ищем вакансию там
+    # Если в функцию не передали список вакансий, то делаем прямой запрос
+    # на SuperJob и ищем вакансию там
     if vacancies == None:
-        load_dotenv() #Загружаем переменные окружения, где хранится секретный токен
+        load_dotenv()  # Загружаем переменные окружения, где хранится токен
         token = os.getenv("TOKEN")
         head = {
             'X-Api-App-Id': token,
         }
         vac_path = 'https://api.superjob.ru/2.0/vacancies/{}/'.format(vacancy_id)
         response = requests.get(vac_path, headers=head).json()
-    #Если на вход функции принят список вакансий, то ищем в нём нужную вакасию
+    # Если на вход функции принят список вакансий, то ищем в нём нужную вакасию
     else:
         response = search_dict_in_list(vacancies, 'id', vacancy_id)
-    #Используем try: на случай если в словаре не будет необходимых ключей (например, при ошибке запроса)
+    # Используем try: на случай если в словаре не будет необходимых ключей
     try:
         salary_currency = response['currency']
         salary_to = response['payment_to']
@@ -234,10 +238,10 @@ def predict_rub_salary_sj(vacancy_id, vacancies=None):
     # Если не указаны зарплаты - возвращаем None
     if salary_from == 0 and salary_to == 0:
         return None
-    # Если указан только нижний потолок зарплаты, то предсказываем с коэффициентом 1.2
+    # Если указан только нижний потолок зарплаты, то предсказываем с коэф. 1.2
     if salary_to == 0 and salary_from != 0:
         return salary_from * 1.2
-    # Если указан только верхний потолок зарплаты, то предсказываем с коэффициентом 0.8
+    # Если указан только верхний потолок зарплаты, то предсказываем с коэф. 0.8
     if salary_from == 0 and salary_to != 0:
         return salary_to * 0.8
     # Если указан весь диапазон зарплат, то передаём среднюю зарплату
@@ -254,7 +258,7 @@ def get_salary_by_lang_hh(lang):
     Function return dictionary like this:
         {
         "vacancies_found": 1000,    # - Количество найденых вакансий
-        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
+        "vacancies_processed": 10,  # - Количество вакансий в расчёте
         "average_salary": 100000    # - Средняя зарплата
         }
     '''
@@ -266,7 +270,7 @@ def get_salary_by_lang_hh(lang):
 
     for i in range(vacancies_found):
         salary_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
-        if salary_id != None:
+        if salary_id is not None:
             vacancies_processed += 1
             average_salary += salary_id
 
@@ -292,7 +296,7 @@ def get_salary_by_lang_sj(lang):
     Function return dictionary like this:
         {
         "vacancies_found": 1000,    # - Количество найденых вакансий
-        "vacancies_processed": 10,  # - Количество вакансий в расчёте средней зарплаты
+        "vacancies_processed": 10,  # - Количество вакансий в расчёте
         "average_salary": 100000    # - Средняя зарплата
         }
     '''
@@ -304,7 +308,7 @@ def get_salary_by_lang_sj(lang):
 
     for i in range(vacancies_found):
         salary_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
-        if salary_id != None:
+        if salary_id is not None:
             vacancies_processed += 1
             average_salary += salary_id
 
@@ -321,7 +325,10 @@ def get_salary_by_lang_sj(lang):
 
 
 def average_salary_by_lang_hh():
-    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
+    '''
+    Function return dictionary of dictionaries with results
+    of works get_salary_by_lang function.
+    '''
 
     langs = [
         'JavaScript',
@@ -343,7 +350,10 @@ def average_salary_by_lang_hh():
 
 
 def average_salary_by_lang_sj():
-    '''Function return dictionary of dictionaries with results of works get_salary_by_lang function.'''
+    '''
+    Function return dictionary of dictionaries with results of works
+    get_salary_by_lang function.
+    '''
 
     langs = [
         'JavaScript',
@@ -373,14 +383,12 @@ def print_table(salary_date, title):
     title -- title of table
 
     '''
-    TABLE_DATA = [
-        (
+    TABLE_DATA = [(
         'Язык программирования',
         'Вакансий найдено',
         'Вакансий обработано',
-        'Средняя зарплата'
-        ),
-    ]
+        'Средняя зарплата',
+    )]
 
     for item in salary_date:
         TABLE_DATA.append((
