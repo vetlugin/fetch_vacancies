@@ -1,5 +1,7 @@
-import requests
+import os
 import time
+import requests
+from dotenv import load_dotenv
 from terminaltables import SingleTable
 
 
@@ -65,9 +67,13 @@ def get_vacancies_sj(lang):
     lang -- language for searching vacancies of programmers
 
     '''
+    load_dotenv() #Загружаем переменные окружения, где хранится секретный токен
+    token = os.getenv("TOKEN")
+
     head = {
-        'X-Api-App-Id': 'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
+        'X-Api-App-Id': token,
     }
+
     page = pages_number = 0
     all_vacancies = []
     vac_path = 'https://api.superjob.ru/2.0/vacancies/'
@@ -204,8 +210,10 @@ def predict_rub_salary_sj(vacancy_id, vacancies=None):
 
     #Если в функцию не передали список вакансий, то делаем прямой запрос на SuperJob и ищем вакансию там
     if vacancies == None:
+        load_dotenv() #Загружаем переменные окружения, где хранится секретный токен
+        token = os.getenv("TOKEN")
         head = {
-            'X-Api-App-Id': 'v3.h.3647339.cbe4828cad13eb79d9bc1f91d0c5f17fc48daa61.401d2bd2746a166ccdd2ba598be642dedfc8ce55',
+            'X-Api-App-Id': token,
         }
         vac_path = 'https://api.superjob.ru/2.0/vacancies/{}/'.format(vacancy_id)
         response = requests.get(vac_path, headers=head).json()
