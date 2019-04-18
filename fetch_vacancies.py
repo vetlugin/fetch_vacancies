@@ -5,6 +5,21 @@ from dotenv import load_dotenv
 from terminaltables import SingleTable
 
 
+langs = [
+    'JavaScript',
+    'Java',
+    'Python',
+    'Ruby',
+    'PHP',
+    'C++',
+    'Go',
+    'Objective-C',
+    'Scala',
+    'Swift',
+    'C#'
+]
+
+
 def search_dict_in_list(list_for_searching, key_item, value_item):
     '''
     The function searches an entry with the key 'key_dict' equal in value to
@@ -109,19 +124,7 @@ def get_lang_rating_hh(count=0):
     Default parameter value is 0.
 
     '''
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
+
     lang_rating = {}
     for lang in langs:
         vacancies = len(get_vacancies_hh(lang))
@@ -140,19 +143,7 @@ def get_lang_rating_sj(count=0):
     Default parameter value is 0.
 
     '''
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
+
     lang_rating = {}
     for lang in langs:
         vacancies = len(get_vacancies_sj(lang))
@@ -330,19 +321,6 @@ def get_average_salary_by_lang_hh():
     of works get_salary_by_lang function.
     '''
 
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
     average_salary_by_lang = {}
     for lang in langs:
         average_salary_by_lang[lang] = get_salary_by_lang_hh(lang)
@@ -355,19 +333,6 @@ def get_average_salary_by_lang_sj():
     get_salary_by_lang function.
     '''
 
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
     average_salary_by_lang = {}
     for lang in langs:
         average_salary_by_lang[lang] = get_salary_by_lang_sj(lang)
