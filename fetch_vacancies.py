@@ -266,23 +266,23 @@ def get_salary_by_lang_hh(lang):
     vacancies_found = len(vacancies)
 
     vacancies_processed = 0
-    average_salary = 0
+    sum_of_lang_salary = 0
 
     for i in range(vacancies_found):
-        salary_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
-        if salary_id is not None:
+        predicted_salary_by_vacancy = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
+        if predicted_salary_by_vacancy is not None:
             vacancies_processed += 1
-            average_salary += salary_id
+            sum_of_lang_salary += predicted_salary_by_vacancy
 
     if vacancies_processed == 0:
-        average_salary = 0
+        sum_of_lang_salary = 0
     else:
-        average_salary /= vacancies_processed
+        sum_of_lang_salary /= vacancies_processed
 
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(average_salary//500*500)
+            'average_salary': int(sum_of_lang_salary//500*500)
             }
 
 
@@ -304,27 +304,27 @@ def get_salary_by_lang_sj(lang):
     vacancies_found = len(vacancies)
 
     vacancies_processed = 0
-    average_salary = 0
+    sum_of_lang_salary = 0
 
     for i in range(vacancies_found):
-        salary_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
-        if salary_id is not None:
+        predicted_salary_by_vacancy = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
+        if predicted_salary_by_vacancy is not None:
             vacancies_processed += 1
-            average_salary += salary_id
+            sum_of_lang_salary += predicted_salary_by_vacancy
 
     if vacancies_processed == 0:
-        average_salary = 0
+        sum_of_lang_salary = 0
     else:
-        average_salary /= vacancies_processed
+        sum_of_lang_salary /= vacancies_processed
 
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(average_salary//500*500)
+            'average_salary': int(sum_of_lang_salary//500*500)
             }
 
 
-def average_salary_by_lang_hh():
+def get_average_salary_by_lang_hh():
     '''
     Function return dictionary of dictionaries with results
     of works get_salary_by_lang function.
@@ -349,7 +349,7 @@ def average_salary_by_lang_hh():
     return average_salary_by_lang
 
 
-def average_salary_by_lang_sj():
+def get_average_salary_by_lang_sj():
     '''
     Function return dictionary of dictionaries with results of works
     get_salary_by_lang function.
@@ -408,10 +408,10 @@ def print_table(salary_date, title):
 if __name__ == '__main__':
     start_time = time.time()
 
-    data_hh = average_salary_by_lang_hh()
+    data_hh = get_average_salary_by_lang_hh()
     print_table(data_hh, ' HeadHunter Moscow ')
 
-    data_sj = average_salary_by_lang_sj()
+    data_sj = get_average_salary_by_lang_sj()
     print_table(data_sj, ' SuperJob Moscow ')
 
     print("--- %s seconds ---" % (time.time() - start_time))
