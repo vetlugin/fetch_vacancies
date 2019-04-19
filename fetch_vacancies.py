@@ -35,6 +35,18 @@ def search_dict_in_list(list_for_searching, key_item, value_item):
     return None
 
 
+def calculate_expected_salary(salary_currency, salary_to, salary_from):
+    # Если валюта не равна рублям - возвращаем None
+    if salary_currency != 'rub' and salary_currency != 'RUR':
+        return None
+    elif salary_from == None or salary_from == 0:
+        return salary_to * 0.8
+    elif salary_to == None or salary_to == 0:
+        return salary_from * 1.2
+    else:
+        return (salary_from+salary_to)/2
+
+
 def get_vacancies_hh(lang):
     '''
     The function accesses to HeadHunter website and returned JSON data of
@@ -174,14 +186,7 @@ def predict_rub_salary_hh(vacancy_id, vacancies):
             salary_from = vacancie_item['salary']['from']
             salary_to = vacancie_item['salary']['to']
 
-            if salary_currency != 'RUR':
-                return None
-            elif salary_from == None:
-                return salary_to * 0.8
-            elif salary_to == None:
-                return salary_from * 1.2
-            else:
-                return (salary_from+salary_to)/2
+    return calculate_expected_salary(salary_currency, salary_to, salary_from)
 
 
 def predict_rub_salary_sj(vacancy_id, vacancies=None):
@@ -221,20 +226,7 @@ def predict_rub_salary_sj(vacancy_id, vacancies=None):
     except KeyError:
         return
 
-    # Если валюта не равна рублям - возвращаем None
-    if salary_currency != 'rub':
-        return None
-    # Если не указаны зарплаты - возвращаем None
-    if salary_from == 0 and salary_to == 0:
-        return None
-    # Если указан только нижний потолок зарплаты, то предсказываем с коэф. 1.2
-    if salary_to == 0 and salary_from != 0:
-        return salary_from * 1.2
-    # Если указан только верхний потолок зарплаты, то предсказываем с коэф. 0.8
-    if salary_from == 0 and salary_to != 0:
-        return salary_to * 0.8
-    # Если указан весь диапазон зарплат, то передаём среднюю зарплату
-    return (salary_from+salary_to)/2
+    return calculate_expected_salary(salary_currency, salary_to, salary_from)
 
 
 def get_salary_by_lang_hh(lang):
@@ -263,10 +255,10 @@ def get_salary_by_lang_hh(lang):
             vacancies_processed += 1
             sum_salary_by_lang += predicted_salary_by_id
 
-    if vacancies_processed == 0:
-        average_salary = 0
-    else:
+    try:
         average_salary = sum_salary_by_lang / vacancies_processed
+    except ZeroDivisionError:
+        average_salary = 0
 
     return {
             'vacancies_found': vacancies_found,
@@ -301,10 +293,10 @@ def get_salary_by_lang_sj(lang):
             vacancies_processed += 1
             sum_salary_by_lang += predicted_salary_by_id
 
-    if vacancies_processed == 0:
-        average_salary = 0
-    else:
+    try:
         average_salary = sum_salary_by_lang / vacancies_processed
+    except ZeroDivisionError:
+        average_salary = 0
 
     return {
             'vacancies_found': vacancies_found,
