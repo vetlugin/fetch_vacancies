@@ -4,19 +4,6 @@ import requests
 from dotenv import load_dotenv
 from terminaltables import SingleTable
 
-langs = [
-    'JavaScript',
-    'Java',
-    'Python',
-    'Ruby',
-    'PHP',
-    'C++',
-    'Go',
-    'Objective-C',
-    'Scala',
-    'Swift',
-    'C#'
-]
 
 langs = [
     'JavaScript',
@@ -278,7 +265,7 @@ def get_salary_by_lang_hh(lang):
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(sum_of_lang_salary//500*500)
+            'average_salary': int(sum_of_lang_salary // 500*500)
             }
 
 
@@ -316,7 +303,7 @@ def get_salary_by_lang_sj(lang):
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(average_salary //500*500)
+            'average_salary': int(average_salary // 500*500)
             }
 
 
