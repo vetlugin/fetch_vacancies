@@ -29,9 +29,9 @@ def search_dict_in_list(list_for_searching, key_item, value_item):
     value_item -- value we want to find
 
     '''
-    for item in range(len(list_for_searching)):
-        if str(list_for_searching[item][key_item]) == str(value_item):
-            return list_for_searching[item]
+    for item_of_list in list_for_searching:
+        if str(item_of_list[key_item]) == str(value_item):
+            return item_of_list
     return None
 
 
@@ -164,15 +164,15 @@ def predict_rub_salary_hh(vacancy_id, vacancies):
     If key 'salary_to' and 'salary_from' is not None
     function return (salary_from + salary_to) / 2
     '''
-    for i in range(len(vacancies)):
-        if int(vacancies[i]['id']) == vacancy_id:
-            salary = vacancies[i]['salary']
+    for vacancie_item in vacancies:
+        if int(vacancie_item['id']) == vacancy_id:
+            salary = vacancie_item['salary']
             if salary == None:
                 return None
 
-            salary_currency = vacancies[i]['salary']['currency']
-            salary_from = vacancies[i]['salary']['from']
-            salary_to = vacancies[i]['salary']['to']
+            salary_currency = vacancie_item['salary']['currency']
+            salary_from = vacancie_item['salary']['from']
+            salary_to = vacancie_item['salary']['to']
 
             if salary_currency != 'RUR':
                 return None
@@ -257,8 +257,8 @@ def get_salary_by_lang_hh(lang):
     vacancies_processed = 0
     sum_salary_by_lang = 0
 
-    for i in range(vacancies_found):
-        predicted_salary_by_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
+    for vacancie_item in vacancies:
+        predicted_salary_by_id = predict_rub_salary_hh(int(vacancie_item['id']), vacancies)
         if predicted_salary_by_id is not None:
             vacancies_processed += 1
             sum_salary_by_lang += predicted_salary_by_id
@@ -295,8 +295,8 @@ def get_salary_by_lang_sj(lang):
     vacancies_processed = 0
     sum_salary_by_lang = 0
 
-    for i in range(vacancies_found):
-        predicted_salary_by_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
+    for vacancie_item in vacancies:
+        predicted_salary_by_id = predict_rub_salary_sj(int(vacancie_item['id']), vacancies)
         if predicted_salary_by_id is not None:
             vacancies_processed += 1
             sum_salary_by_lang += predicted_salary_by_id
@@ -311,18 +311,6 @@ def get_salary_by_lang_sj(lang):
             'vacancies_processed': vacancies_processed,
             'average_salary': int(average_salary //500*500)
             }
-
-
-def average_salary_by_lang_hh():
-    '''
-    Function return dictionary of dictionaries with results
-    of works get_salary_by_lang function.
-    '''
-
-    average_salary_by_lang = {lang:get_salary_by_lang_hh(lang) for lang in langs}
-    #for lang in langs:
-    #    average_salary_by_lang[lang] = get_salary_by_lang_hh(lang)
-    return average_salary_by_lang
 
 
 def print_table(salary_date, title):
