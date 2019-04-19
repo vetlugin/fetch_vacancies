@@ -4,6 +4,19 @@ import requests
 from dotenv import load_dotenv
 from terminaltables import SingleTable
 
+langs = [
+    'JavaScript',
+    'Java',
+    'Python',
+    'Ruby',
+    'PHP',
+    'C++',
+    'Go',
+    'Objective-C',
+    'Scala',
+    'Swift',
+    'C#'
+]
 
 def search_dict_in_list(list_for_searching, key_item, value_item):
     '''
@@ -109,19 +122,7 @@ def get_lang_rating_hh(count=0):
     Default parameter value is 0.
 
     '''
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
+
     lang_rating = {}
     for lang in langs:
         vacancies = len(get_vacancies_hh(lang))
@@ -140,19 +141,7 @@ def get_lang_rating_sj(count=0):
     Default parameter value is 0.
 
     '''
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
+
     lang_rating = {}
     for lang in langs:
         vacancies = len(get_vacancies_sj(lang))
@@ -266,18 +255,18 @@ def get_salary_by_lang_hh(lang):
     vacancies_found = len(vacancies)
 
     vacancies_processed = 0
-    average_salary = 0
+    sum_salary_by_lang = 0
 
     for i in range(vacancies_found):
-        salary_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
-        if salary_id is not None:
+        predicted_salary_by_id = predict_rub_salary_hh(int(vacancies[i]['id']), vacancies)
+        if predicted_salary_by_id is not None:
             vacancies_processed += 1
-            average_salary += salary_id
+            sum_salary_by_lang += predicted_salary_by_id
 
     if vacancies_processed == 0:
         average_salary = 0
     else:
-        average_salary /= vacancies_processed
+        average_salary = sum_salary_by_lang / vacancies_processed
 
     return {
             'vacancies_found': vacancies_found,
@@ -304,23 +293,23 @@ def get_salary_by_lang_sj(lang):
     vacancies_found = len(vacancies)
 
     vacancies_processed = 0
-    average_salary = 0
+    sum_salary_by_lang = 0
 
     for i in range(vacancies_found):
-        salary_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
-        if salary_id is not None:
+        predicted_salary_by_id = predict_rub_salary_sj(int(vacancies[i]['id']), vacancies)
+        if predicted_salary_by_id is not None:
             vacancies_processed += 1
-            average_salary += salary_id
+            sum_salary_by_lang += predicted_salary_by_id
 
     if vacancies_processed == 0:
         average_salary = 0
     else:
-        average_salary /= vacancies_processed
+        average_salary = sum_salary_by_lang / vacancies_processed
 
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(average_salary//500*500)
+            'average_salary': int(average_salary //500*500)
             }
 
 
@@ -330,47 +319,9 @@ def average_salary_by_lang_hh():
     of works get_salary_by_lang function.
     '''
 
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
-    average_salary_by_lang = {}
-    for lang in langs:
-        average_salary_by_lang[lang] = get_salary_by_lang_hh(lang)
-    return average_salary_by_lang
-
-
-def average_salary_by_lang_sj():
-    '''
-    Function return dictionary of dictionaries with results of works
-    get_salary_by_lang function.
-    '''
-
-    langs = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'Go',
-        'Objective-C',
-        'Scala',
-        'Swift',
-        'C#'
-    ]
-    average_salary_by_lang = {}
-    for lang in langs:
-        average_salary_by_lang[lang] = get_salary_by_lang_sj(lang)
+    average_salary_by_lang = {lang:get_salary_by_lang_hh(lang) for lang in langs}
+    #for lang in langs:
+    #    average_salary_by_lang[lang] = get_salary_by_lang_hh(lang)
     return average_salary_by_lang
 
 
@@ -408,10 +359,10 @@ def print_table(salary_date, title):
 if __name__ == '__main__':
     start_time = time.time()
 
-    data_hh = average_salary_by_lang_hh()
+    data_hh = {lang:get_salary_by_lang_hh(lang) for lang in langs}
     print_table(data_hh, ' HeadHunter Moscow ')
 
-    data_sj = average_salary_by_lang_sj()
+    data_sj = {lang: get_salary_by_lang_sj(lang) for lang in langs}
     print_table(data_sj, ' SuperJob Moscow ')
 
     print("--- %s seconds ---" % (time.time() - start_time))
