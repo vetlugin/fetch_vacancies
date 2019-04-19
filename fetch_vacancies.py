@@ -18,6 +18,21 @@ langs = [
     'C#'
 ]
 
+langs = [
+    'JavaScript',
+    'Java',
+    'Python',
+    'Ruby',
+    'PHP',
+    'C++',
+    'Go',
+    'Objective-C',
+    'Scala',
+    'Swift',
+    'C#'
+]
+
+
 def search_dict_in_list(list_for_searching, key_item, value_item):
     '''
     The function searches an entry with the key 'key_dict' equal in value to
@@ -263,7 +278,7 @@ def get_salary_by_lang_hh(lang):
     return {
             'vacancies_found': vacancies_found,
             'vacancies_processed': vacancies_processed,
-            'average_salary': int(average_salary//500*500)
+            'average_salary': int(sum_of_lang_salary//500*500)
             }
 
 
